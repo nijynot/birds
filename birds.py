@@ -25,4 +25,3 @@ dates = []
 with open('bird_jan25jan16.txt', 'r') as f:
     for line in f:
         
-        
