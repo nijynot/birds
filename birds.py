@@ -38,6 +38,12 @@ def fix_corrupt(data):
             new.append([data[i][0], count])
     return new
 
+def plot_hourly(data, date, days):
+    dates = []
+    for i in range(len(data)):
+        if (data[i][0].date() == date):
+            dates.append(data[i])
+
 data = []
 
 with open('bird_jan25jan16 copy.txt', 'r') as f:
