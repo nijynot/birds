@@ -21,32 +21,33 @@ def diff(data):
     new = []
     for i in range(len(data)):
         delta = data[i][1] - data[i - 1][1]
-        if (delta > 100):
+        if (delta > 100): # check if over 100
             print(delta, i)
         if (data[i][1] == 0 and data[i + 1][1] - data[i - 1][1] >= 0):
+            # if count is 0 and row - 1 and row + 1 is non-zero,
+            # then set count as average
             data[i][1] = int((data[i - 1][1] + data[i + 1][1]) / 2)
-        elif (i == 0 or data[i][1] == 0):
+        elif (i == 0 or data[i][1] == 0): # if first row
             new.append([data[i][0], 0])
-        elif (delta >= 0):
+        elif (delta >= 0): # if positive
             new.append([data[i][0], np.clip(delta, 0, 5)])
-        elif (delta < 0):
+        elif (delta < 0): # if negative
             data[i][1] = int((data[i - 1][1] + data[i + 1][1]) / 2)
-            #count = data[i - 1][1]
             new.append([data[i][0], new[-1][1]])
     return new
 
 def filter_by_interval(data, lower, upper):
     dates = []
-    for i in range(len(data)):
-        if (data[i][0] > lower and data[i][0] < upper):
-            dates.append(data[i])
+    for row in data:
+        if (row[0] > lower and row[0] < upper):
+            dates.append(row)
     return dates
 
 def sum_score(data, lower, upper):
     score = 0
-    for i in range(len(data)):
-        if (data[i][0] > lower and data[i][0] < upper):
-            score += data[i][1]
+    for row in data:
+        if (row[0] > lower and row[0] < upper):
+            score += row[1]
     return score
 
 def reduce(data):
