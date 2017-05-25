@@ -31,7 +31,7 @@ def diff(data):
             new.append([data[i][0], 0])
         elif (delta >= 0): # if positive
             new.append([data[i][0], np.clip(delta, 0, 5)])
-        elif (delta < 0): # if negative
+        elif (delta < 0): # if negative set average of i - 1 and i + 1
             data[i][1] = int((data[i - 1][1] + data[i + 1][1]) / 2)
             new.append([data[i][0], new[-1][1]])
     return new
@@ -71,6 +71,22 @@ def plot(data):
     ax.bar(x, y, width=0.1, facecolor='b', alpha=.5, linewidth=0)
     plt.show()
 
+def ploting(data):
+    x = [line[0] for line in data]
+    y = [line[1] for line in data]
+    date1 = datetime.strptime('2015-03-02', '%Y-%m-%d').replace(tzinfo=timezone.utc).astimezone(tz=None)
+    date2 = datetime.strptime('2015-03-03', '%Y-%m-%d').replace(tzinfo=timezone.utc).astimezone(tz=None)
+    fig, ax = plt.subplots()
+    fig.autofmt_xdate()
+    ax.yaxis.set_major_locator(ticker.MaxNLocator(integer=True))
+    ax.xaxis.set_major_locator(dates.DayLocator(bymonthday=range(1,32), interval=1))
+    ax.xaxis.set_major_formatter(dates.DateFormatter('%Y-%m-%d'))
+    ax.bar(x, y, width=0.1, facecolor='b', alpha=.5, linewidth=0)
+    #ax.axvspan(date1, date2, color='y', alpha=.2, linewidth=0)
+    for i in range(len(x)):
+        ax.axvspan(date1, date2, color='y', alpha=.2, linewidth=0)
+    plt.show()
+    
 data = []
  
 date1 = datetime.strptime('2015-03-01', '%Y-%m-%d').replace(tzinfo=timezone.utc).astimezone(tz=None)
@@ -85,7 +101,7 @@ ax.xaxis.set_major_formatter(xfmt)
 
 plt.show()
 
-with open('sample.txt', 'r') as f:
+with open('interval.txt', 'r') as f:
     for line in f:
         data.append(preprocess_line(line))
 
