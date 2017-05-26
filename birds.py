@@ -95,32 +95,34 @@ def plot_astral(data):
     city = a['Copenhagen']
     x = [line[0] for line in data]
     y = [line[1] for line in data]
-    date1 = datetime.strptime('2015-03-02', '%Y-%m-%d').replace(tzinfo=timezone.utc).astimezone(tz=None)
-    date2 = datetime.strptime('2015-03-03', '%Y-%m-%d').replace(tzinfo=timezone.utc).astimezone(tz=None)
     fig, ax = plt.subplots()
     fig.autofmt_xdate()
     ax.yaxis.set_major_locator(ticker.MaxNLocator(integer=True))
     ax.xaxis.set_major_locator(dates.DayLocator(bymonthday=range(1,32), interval=1))
     ax.xaxis.set_major_formatter(dates.DateFormatter('%Y-%m-%d'))
     ax.bar(x, y, width=0.05, facecolor='b', alpha=.5, linewidth=0)
-    #ax.axvspan(date1, date2, color='y', alpha=.2, linewidth=0)
     for i in range(len(x)):
         ast = city.sun(date=x[i], local=True)
         if (ast['dawn'] < x[i] and ast['dusk'] > x[i]):
             ax.axvspan(x[i], x[i] + timedelta(hours=1), color='y', alpha=.2, linewidth=0)
     plt.show()
     
-data = []
- 
+data_all = []
+data_astral = [] 
+
 date1 = datetime.strptime('2015-03-01', '%Y-%m-%d').replace(tzinfo=timezone.utc).astimezone(tz=None)
 date2 = datetime.strptime('2015-03-04', '%Y-%m-%d').replace(tzinfo=timezone.utc).astimezone(tz=None)
 
-with open('bird_jan25jan16.txt', 'r') as f:
+with open('birddata.txt', 'r') as f:
     for line in f:
-        data.append(preprocess_line(line))
+        data_all.append(preprocess_line(line))
 
-data_all = diff(data)
+with open('interval.txt', 'r') as f:
+    for line in f:
+        data_astral.append(preprocess_line(line))
+
+data_all = diff(data_all)
 data_all = reduce(data_all, 'days')
-#data_astral = diff_astral(data)
-#data_astral = reduce()
-filterd = filter_by_interval(data, date1, date2)
+data_astral = diff_astral(data_astral)
+data_astral = reduce(data_astral, 'hours')
+filtered = filter_by_interval(data_astral, date1, date2)
