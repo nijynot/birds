@@ -43,12 +43,12 @@ def diff_astral(data):
         elif (i == 0 or data[i][1] == 0): # if first row
             new.append([data[i][0], 0])
         elif (delta >= 0): # if positive
-            new.append([data[i][0], np.clip(delta, 0, 5)])
+            new.append([data[i][0], np.clip(delta, 0, 8)])
         elif (delta < 0): # if negative set average of i - 1 and i + 1
             data[i][1] = int((data[i - 1][1] + data[i + 1][1]) / 2)
             new.append([data[i][0], new[-1][1]])
     return new
-
+    
 def filter_by_interval(data, lower, upper):
     dates = []
     for row in data:
@@ -63,39 +63,40 @@ def sum_score(data, lower, upper):
             score += row[1]
     return score
 
-def reduce(data, type):
+def reduce(data, x_format):
     new = []
     tmp = list(data)
     while len(tmp) > 0:
         print(len(tmp))
-        lower_hour = tmp[0][0].replace(minute=0, second=0, microsecond=0)
-        if (type == 'days'):
+        if (x_format == 'days'):
+            lower_hour = tmp[0][0].replace(hour=1, minute=0, second=0, microsecond=0)
             upper_hour = lower_hour + timedelta(days=1)
-        elif (type == 'hours'):
+        elif (x_format == 'hours'):
+            lower_hour = tmp[0][0].replace(minute=0, second=0, microsecond=0)
             upper_hour = lower_hour + timedelta(hours=1)
         score = sum_score(data, lower_hour, upper_hour)
         tmp = [line for line in tmp if line[0] > upper_hour]
         new.append([upper_hour, score])
     return new
-
+    
 def plot(data):
     x = [line[0] for line in data]
     y = [line[1] for line in data]
     fig, ax = plt.subplots()
     fig.autofmt_xdate()
     ax.yaxis.set_major_locator(ticker.MaxNLocator(integer=True))
-    #ax.xaxis.set_minor_locator(dates.HourLocator())
-    ax.bar(x, y, width=0.05, facecolor='b', alpha=.5, linewidth=0)
+    ax.xaxis.set_minor_locator(dates.DayLocator(bymonthday=range(1,32), interval=1))
+    ax.bar(x, y, width=1, facecolor='b', alpha=.5, linewidth=0)
     plt.show()
 
 def plot_astral(data):
     a = Astral()
     a.solar_depression = 'civil'
-    l = Location(('Södra Sandby', 'Sweden', 55.712163, 13.332234, 'Europe/Copenhagen', 0))
+    city = a['Copenhagen']
     x = [line[0] for line in data]
     y = [line[1] for line in data]
-    #date1 = datetime.strptime('2015-03-02', '%Y-%m-%d').replace(tzinfo=timezone.utc).astimezone(tz=None)
-    #date2 = datetime.strptime('2015-03-03', '%Y-%m-%d').replace(tzinfo=timezone.utc).astimezone(tz=None)
+    date1 = datetime.strptime('2015-03-02', '%Y-%m-%d').replace(tzinfo=timezone.utc).astimezone(tz=None)
+    date2 = datetime.strptime('2015-03-03', '%Y-%m-%d').replace(tzinfo=timezone.utc).astimezone(tz=None)
     fig, ax = plt.subplots()
     fig.autofmt_xdate()
     ax.yaxis.set_major_locator(ticker.MaxNLocator(integer=True))
@@ -104,7 +105,7 @@ def plot_astral(data):
     ax.bar(x, y, width=0.05, facecolor='b', alpha=.5, linewidth=0)
     #ax.axvspan(date1, date2, color='y', alpha=.2, linewidth=0)
     for i in range(len(x)):
-        ast = l.sun(date=x[i], local=True)
+        ast = city.sun(date=x[i], local=True)
         if (ast['dawn'] < x[i] and ast['dusk'] > x[i]):
             ax.axvspan(x[i], x[i] + timedelta(hours=1), color='y', alpha=.2, linewidth=0)
     plt.show()
@@ -113,22 +114,13 @@ data = []
  
 date1 = datetime.strptime('2015-03-01', '%Y-%m-%d').replace(tzinfo=timezone.utc).astimezone(tz=None)
 date2 = datetime.strptime('2015-03-04', '%Y-%m-%d').replace(tzinfo=timezone.utc).astimezone(tz=None)
-'''
-fig, ax = plt.subplots(1)
-#fig.autofmt_xdate()
-plt.plot([date1, date2], [13, 5])
 
-xfmt = dates.DateFormatter('%H')
-ax.xaxis.set_major_formatter(xfmt)
-
-plt.show()'''
-
-with open('interval.txt', 'r') as f:
+with open('bird_jan25jan16.txt', 'r') as f:
     for line in f:
         data.append(preprocess_line(line))
 
-#data_all = diff(data)
-#data_all = reduce(data_all, 'days')
-data_astral = diff_astral(data)
-data_astral = reduce(data_astral, 'hours')
-filterd = filter_by_interval(data_astral, date1, date2)
+data_all = diff(data)
+data_all = reduce(data_all, 'days')
+#data_astral = diff_astral(data)
+#data_astral = reduce()
+filterd = filter_by_interval(data, date1, date2)
